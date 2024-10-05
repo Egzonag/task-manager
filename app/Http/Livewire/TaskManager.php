@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Livewire;
 
 use App\Models\Task;
@@ -17,6 +16,30 @@ class TaskManager extends Component
         $this->tasks = Task::orderBy('priority')->get();
         $this->projects = Project::all();
     }
+
+    public function reorderTasks($data)
+    {
+        $taskId = $data['id'];
+        $newIndex = $data['newIndex'];
+     
+        $task = Task::find($taskId);
+        $currentPriority = $task->priority;
+     
+        if ($newIndex + 1 < $currentPriority) { 
+            Task::where('priority', '>=', $newIndex + 1)
+                ->where('priority', '<', $currentPriority)
+                ->increment('priority');
+        } elseif ($newIndex + 1 > $currentPriority) { 
+            Task::where('priority', '>', $currentPriority)
+                ->where('priority', '<=', $newIndex + 1)
+                ->decrement('priority');
+        }
+     
+        $task->update(['priority' => $newIndex + 1]);
+     
+        $this->tasks = Task::orderBy('priority')->get();
+    }
+    
 
     public function createTask()
     {
@@ -63,7 +86,7 @@ class TaskManager extends Component
 
         $this->resetInput();
         $this->tasks = Task::orderBy('priority')->get();
-        $this->isEditing = false; 
+        $this->isEditing = false;
     }
 
     public function deleteTask($id)
