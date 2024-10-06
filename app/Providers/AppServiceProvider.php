@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use App\Http\Livewire\TaskManager;
 use App\Http\Livewire\ProjectManager;
 use Livewire\Livewire;
+use App\Repositories\TaskRepositoryInterface;
+use App\Repositories\TaskRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            TaskRepositoryInterface::class,
+            TaskRepository::class
+        );
     }
 
     /**

@@ -4,16 +4,25 @@ namespace App\Http\Livewire;
 use App\Models\Task;
 use App\Models\Project;
 use Livewire\Component;
+use App\Repositories\TaskRepository;
+use App\Repositories\TaskRepositoryInterface;
 
-class TaskManager extends Component
+class TaskManager extends Component 
 {
     public $tasks, $taskName, $taskId, $taskPriority, $projectId;
     public $projects;
-    public $isEditing = false;
+    public $isEditing = false; 
+    protected $taskRepository;
 
-    public function mount()
+    
+    public function boot(TaskRepositoryInterface $taskRepository)
     {
-        $this->tasks = Task::orderBy('priority')->get();
+        $this->taskRepository = $taskRepository;
+    }
+
+    public function mount() 
+    { 
+        $this->tasks = $this->taskRepository->getAllTasksOrderedByPriority();
         $this->projects = Project::all();
     }
 
@@ -21,26 +30,13 @@ class TaskManager extends Component
     {
         $taskId = $data['id'];
         $newIndex = $data['newIndex'];
-     
-        $task = Task::find($taskId);
-        $currentPriority = $task->priority;
-     
-        if ($newIndex + 1 < $currentPriority) { 
-            Task::where('priority', '>=', $newIndex + 1)
-                ->where('priority', '<', $currentPriority)
-                ->increment('priority');
-        } elseif ($newIndex + 1 > $currentPriority) { 
-            Task::where('priority', '>', $currentPriority)
-                ->where('priority', '<=', $newIndex + 1)
-                ->decrement('priority');
-        }
-     
-        $task->update(['priority' => $newIndex + 1]);
-     
-        $this->tasks = Task::orderBy('priority')->get();
+         
+        $this->taskRepository->reorderTasks($taskId, $newIndex);
+  
+        $this->tasks = $this->taskRepository->getAllTasksOrderedByPriority();
     }
-    
 
+     
     public function createTask()
     {
         $this->validate([
@@ -49,19 +45,19 @@ class TaskManager extends Component
             'projectId' => 'nullable|exists:projects,id',
         ]);
 
-        Task::create([
+        $this->taskRepository->createTask([
             'name' => $this->taskName,
             'priority' => $this->taskPriority,
             'project_id' => $this->projectId,
         ]);
 
         $this->resetInput();
-        $this->tasks = Task::orderBy('priority')->get();
+        $this->tasks = $this->taskRepository->getAllTasksOrderedByPriority();
     }
 
     public function editTask($id)
     {
-        $task = Task::find($id);
+        $task = $this->taskRepository->findTaskById($id);
         $this->taskId = $task->id;
         $this->taskName = $task->name;
         $this->taskPriority = $task->priority;
@@ -77,22 +73,21 @@ class TaskManager extends Component
             'projectId' => 'nullable|exists:projects,id',
         ]);
 
-        $task = Task::find($this->taskId);
-        $task->update([
+        $this->taskRepository->updateTask($this->taskId, [
             'name' => $this->taskName,
             'priority' => $this->taskPriority,
             'project_id' => $this->projectId,
         ]);
 
         $this->resetInput();
-        $this->tasks = Task::orderBy('priority')->get();
+        $this->tasks = $this->taskRepository->getAllTasksOrderedByPriority();
         $this->isEditing = false;
     }
 
     public function deleteTask($id)
     {
-        Task::find($id)->delete();
-        $this->tasks = Task::orderBy('priority')->get();
+        $this->taskRepository->deleteTask($id);
+        $this->tasks = $this->taskRepository->getAllTasksOrderedByPriority();
     }
 
     public function resetInput()
