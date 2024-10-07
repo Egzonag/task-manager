@@ -1,6 +1,5 @@
 <div class="flex justify-center items-center min-h-screen bg-gray-50">
     <div class="flex w-full max-w-6xl bg-white rounded-lg shadow p-6">
-        <!-- Left side - Task form -->
         <div class="w-1/2 pr-6 border-r">
             <div class="text-right mb-4">
                 <a href="{{ route('projects') }}" class="text-sm text-blue-500 hover:underline">Manage Projects</a>
@@ -26,8 +25,6 @@
                 @endif
             </div>
         </div>
-
-        <!-- Right side - Task list -->
         <div class="w-1/2 pl-6">
             <h1 class="text-xl font-bold text-center mb-6">Task List</h1>
 

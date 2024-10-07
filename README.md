@@ -17,10 +17,27 @@ Installation
 
 2. Install dependencies:
    composer install
+   npm install
 
 3. Set up the environment:
     cp .env.example .env
     php artisan key:generate
 
 4. Update `.env` with your database credentials
+    DB_DATABASE=your_database
+    DB_USERNAME=your_username
+    DB_PASSWORD=your_password
 
+5. Migrate the Database
+    php artisan migrate
+
+6. Run the Application
+    php artisan serve
+
+7. Compile Frontend Assets
+    npm run dev
+
+Testing
+
+1. Navigate to the /projects page to create a few projects.
+2. After adding projects, go to the Task Manager to manage tasks associated with those projects.
